@@ -2,11 +2,13 @@
 
 #Installation  du projet 
 
-1. Utiliser un interface de développement (Intellij,VS Code)
+1.Utiliser un interface de développement (Intellij,VS Code)
 
-2.Cloner ce dépôt
+2.Cloner ce dépôt avec cette commande:
+<br>git clone https://github.com/Anthony10012/ProjFront_AGI.git<br>
 
 3.Aller dans le terminal et taper ces commandes dans l'ordre:
+
 
  npm create vue@latest my-isbn-project
  
