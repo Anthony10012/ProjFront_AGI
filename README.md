@@ -29,6 +29,6 @@ Présentation de la structure du projet
 Explication de l’API choisie et de son intégration
 
 **Lien vers l'API utilisée**
-<br>/<br>
+<br>https://developer.themoviedb.org/docs/getting-started<br>
 
 **Exemple de requête ou d'intégration**
