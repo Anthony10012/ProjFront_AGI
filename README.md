@@ -2,7 +2,7 @@
 
 #Installation  du projet 
 
-1.Utiliser un interface de développement (Intellij,VS Code)
+1. Utiliser un interface de développement (Intellij,VS Code)
 
 2.Cloner ce dépôt
 
