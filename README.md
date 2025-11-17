@@ -27,3 +27,6 @@ Présentation de la structure du projet
 
 
 Explication de l’API choisie et de son intégration
+
+**Lien vers l'API utilisée**
+<br>https://isbndb.com/<br>
