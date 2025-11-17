@@ -12,12 +12,14 @@
 **Pour créer le projet Vue.js** 
 <br>npm create vue@latest my-isbn-project<br>
 
- 
-cd my-isbn-project
- 
-npm install
- 
-npm run dev
+**Aller a la racine du projet**
+<br>cd my-isbn-project<br>
+
+**Installer toute les dépendances du projet**
+<br>npm install<br>
+
+ **Lancer le projet**
+<br>npm run dev<br>
 
 
 Présentation de la structure du projet	
