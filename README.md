@@ -9,7 +9,7 @@
 
 3.Aller dans le terminal et taper ces commandes dans l'ordre:
 
-#Pour créer le projet Vue.js 
+##Pour créer le projet Vue.js 
 <br>npm create vue@latest my-isbn-project<br>
 
  
