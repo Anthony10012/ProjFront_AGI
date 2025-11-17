@@ -9,14 +9,14 @@
 
 3.Aller dans le terminal et taper ces commandes dans l'ordre:
 
+<br>npm create vue@latest my-isbn-project<br>
 
- npm create vue@latest my-isbn-project
  
- cd my-isbn-project
+cd my-isbn-project
  
- npm install
+npm install
  
- npm run dev
+npm run dev
 
 
 Présentation de la structure du projet	
