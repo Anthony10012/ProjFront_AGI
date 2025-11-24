@@ -31,4 +31,11 @@
 **Lien vers l'API utilisée**
 <br>https://www.themoviedb.org/<br>
 
+**Clé API**
+Pour utiliser, The Movie Database, il faut créer un compte puis récupérer un Token d'accès API v4 dans:
+Settings -> API -> API Read Access Token (v4 auth)
+
+La clé doit être placée dans un fichier .env :
+VITE_TMDB_TOKEN=TON_TOKEN_ICI
+
 **Exemple de requête ou d'intégration**
