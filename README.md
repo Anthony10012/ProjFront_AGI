@@ -22,11 +22,11 @@
 <br>npm run dev<br>
 
 
-Présentation de la structure du projet	
+# Présentation de la structure du projet	
 
 
 
-Explication de l’API choisie et de son intégration
+# Explication de l’API choisie et de son intégration
 
 **Lien vers l'API utilisée**
 <br>https://www.themoviedb.org/<br>
