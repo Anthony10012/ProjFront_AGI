@@ -1,6 +1,15 @@
+/**
+ *
+ *
+ *@author: Anthony Simond,Imad El Khattabi,Gaetan Gendroz
+ *@date: 17.11.2025
+ *@version: 1.0.0
+ *
+ *
+ * */
 import { defineStore } from 'pinia';
 
-// Récupérer la clé API de l'environnement
+// Récupére la clé API de TheMovieDB
 const API_KEY = import.meta.env.VITE_API_KEY;
 const API_URL = 'https://api.themoviedb.org/3/search/movie';
 
@@ -36,17 +45,17 @@ export const useSearchStore = defineStore('search', {
 
                 const data = await response.json();
 
-                // ✅ Affichage des résultats
+                //Affichage des résultats
                 this.results = data.results;
 
             } catch (err) {
-                // ❌ Gestion des erreurs
+                //Gestion des erreurs
                 console.error("Erreur lors de la recherche TMDB:", err);
                 this.error = "Impossible de récupérer les résultats. Veuillez réessayer.";
                 this.results = [];
 
             } finally {
-                // 🔄 Gestion du chargement
+                //Gestion du chargement
                 this.isLoading = false;
             }
         }
