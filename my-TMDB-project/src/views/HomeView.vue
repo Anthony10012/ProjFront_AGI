@@ -46,6 +46,7 @@ const { results, isLoading, error, query } = storeToRefs(searchStore);
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
+
 }
 h2, h3 {
   color: #032541;
