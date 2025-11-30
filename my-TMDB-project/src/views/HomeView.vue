@@ -1,5 +1,5 @@
 <script setup>
-import SearchForm from '@/components/SearchForm.vue';
+import SearchResult from '@/components/SearchResult.vue';
 import MovieResult from '@/components/MovieResult.vue';
 import { useSearchStore } from '@/stores/search';
 import { storeToRefs } from 'pinia';
@@ -11,34 +11,35 @@ const { results, isLoading, error, query } = storeToRefs(searchStore);
 </script>
 
 <template>
-  <main class="search-page">
-    <h2>Recherche de Films TMDBs</h2>
+    <main class="search-page">
+      <h2>Recherche de Films TMDBs</h2>
 
-    <SearchForm />
+      <SearchResult />
 
-    <div v-if="isLoading" class="status-message">
-      Chargement des résultats pour "{{ query }}"...         </div>
+      <div v-if="isLoading" class="status-message">
+        Chargement des résultats pour "{{ query }}"...
+      </div>
 
-    <div v-else-if="error" class="error-message">
-      ❌ Erreur: {{ error }}
-    </div>
+      <div v-else-if="error" class="error-message">
+         Erreur: {{ error }}
+      </div>
 
-    <div v-else-if="results.length > 0" class="results-list">
-      <h3>Résultats de recherche pour "{{ query }}" ({{ results.length }} trouvés)</h3>
-      <MovieResult
-          v-for="movie in results"
-          :key="movie.id"
-          :movie="movie"
-      />
-    </div>
+      <div v-else-if="results.length > 0" class="results-list">
+        <h3>Résultats de recherche pour "{{ query }}" ({{ results.length }} trouvés)</h3>
+        <MovieResult
+            v-for="movie in results"
+            :key="movie.id"
+            :movie="movie"
+        />
+      </div>
 
-    <div v-else-if="query && !isLoading" class="status-message no-results">
-      Aucun résultat trouvé pour "{{ query }}".
-    </div>
-    <div v-else class="status-message initial-message">
-      Veuillez entrer un terme de recherche pour commencer.
-    </div>
-  </main>
+      <div v-else-if="query && !isLoading" class="status-message no-results">
+        Aucun résultat trouvé pour "{{ query }}".
+      </div>
+      <div v-else class="status-message initial-message">
+        Veuillez entrer un terme de recherche pour commencer.
+      </div>
+    </main>
 </template>
 
 <style scoped>
@@ -72,4 +73,6 @@ h2, h3 {
 .results-list {
   margin-top: 20px;
 }
+
+
 </style>
