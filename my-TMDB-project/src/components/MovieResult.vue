@@ -17,14 +17,16 @@ const posterUrl = props.movie.poster_path
 </script>
 
 <template>
-  <div class="movie-card">
-    <img :src="posterUrl" :alt="`Affiche de ${movie.title}`" class="movie-poster" />
-    <div class="movie-info">
-      <h3>{{ movie.title }}</h3>
-      <p class="release-date">Sortie: {{ movie.release_date || 'N/A' }}</p>
-      <p class="overview">{{ movie.overview.substring(0, 150) + (movie.overview.length > 150 ? '...' : '') }}</p>
+  <router-link :to="`/movie/${movie.id}`" class="movie-card">
+    <div class="movie-card">
+      <img :src="posterUrl" :alt="`Affiche de ${movie.title}`" class="movie-poster" />
+      <div class="movie-info">
+        <h3>{{ movie.title }}</h3>
+        <p class="release-date">Sortie: {{ movie.release_date || 'N/A' }}</p>
+        <p class="overview">{{ movie.overview.substring(0, 150) + (movie.overview.length > 150 ? '...' : '') }}</p>
+      </div>
     </div>
-  </div>
+  </router-link>
 </template>
 
 <style scoped>
