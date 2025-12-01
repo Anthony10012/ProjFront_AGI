@@ -10,10 +10,10 @@
 3. Aller dans le terminal et taper ces commandes dans l'ordre:
 
 **Pour créer le projet Vue.js** 
-<br>npm create vue@latest my-isbn-project<br>
+<br>npm create vue@latest my-TMDB-project<br>
 
 **Aller a la racine du projet**
-<br>cd my-isbn-project<br>
+<br>cd my-TMDB-project<br>
 
 **Installer toute les dépendances du projet**
 <br>npm install<br>
