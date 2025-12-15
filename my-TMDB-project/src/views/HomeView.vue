@@ -1,78 +1,126 @@
-<script setup>
-import SearchResult from '@/components/SearchResult.vue';
-import MovieResult from '@/components/MovieResult.vue';
-import { useSearchStore } from '@/stores/search';
-import { storeToRefs } from 'pinia';
-
-const searchStore = useSearchStore();
-
-// Utiliser storeToRefs pour que les propriétés d'état restent réactives
-const { results, isLoading, error, query } = storeToRefs(searchStore);
-</script>
-
 <template>
-    <main class="search-page">
-      <h2>Recherche de Films TMDBs</h2>
+  <div class="home">
+    <h1>Films</h1>
 
-      <SearchResult />
+    <!-- Barre de recherche -->
+    <div class="search">
+      <input class="sb" v-model="query" placeholder="Rechercher un film..." />
+      <button  class="btn" @click="searchMovies">Rechercher</button>
+      <!-- Bouton vers la page avancée -->
+      <router-link to="/movies">
+        <button class="btn">Filtres & Tri avancés</button>
+      </router-link>
 
-      <div v-if="isLoading" class="status-message">
-        Chargement des résultats pour "{{ query }}"...
-      </div>
+    </div>
 
-      <div v-else-if="error" class="error-message">
-         Erreur: {{ error }}
-      </div>
 
-      <div v-else-if="results.length > 0" class="results-list">
-        <h3>Résultats de recherche pour "{{ query }}" ({{ results.length }} trouvés)</h3>
-        <MovieResult
-            v-for="movie in results"
-            :key="movie.id"
-            :movie="movie"
+    <!-- Résultats -->
+    <div class="grid">
+      <div
+          v-for="movie in displayedMovies"
+          :key="movie.id"
+          class="movie-card"
+      >
+        <img
+            v-if="movie.poster_path"
+            :src="'https://image.tmdb.org/t/p/w200' + movie.poster_path"
+            alt=""
         />
+        <h3>{{ movie.title }}</h3>
+        <p>{{ movie.release_date }}</p>
+        <p>⭐ {{ movie.vote_average }}</p>
       </div>
+    </div>
 
-      <div v-else-if="query && !isLoading" class="status-message no-results">
-        Aucun résultat trouvé pour "{{ query }}".
-      </div>
-      <div v-else class="status-message initial-message">
-        Veuillez entrer un terme de recherche pour commencer.
-      </div>
-    </main>
+
+  </div>
 </template>
 
+<script setup>
+import { ref, onMounted, computed } from "vue";
+
+const apiKey = "d7a3a9b7bf495277a0437c9f4031d048";
+
+const query = ref("");
+const moviesPopular = ref([]);
+const searchResults = ref([]); // <- garder pour les résultats de recherche
+
+// Charger les films populaires au montage
+onMounted(async () => {
+  const res = await fetch(
+      `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr&sort_by=popularity.desc&page=1`
+  );
+  const data = await res.json();
+  moviesPopular.value = data.results.slice(0,18); // seulement quelques films
+});
+
+// Recherche de films
+async function searchMovies() {
+  if (!query.value) {
+    searchResults.value = [];
+    return;
+  }
+
+  const res = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr&query=${encodeURIComponent(
+          query.value
+      )}`
+  );
+  const data = await res.json();
+  searchResults.value = data.results;
+}
+
+// Computed : choisir quoi afficher
+const displayedMovies = computed(() => {
+  // Si searchResults a des films, on affiche ceux-là
+  return searchResults.value.length > 0 ? searchResults.value : moviesPopular.value;
+});
+</script>
+
 <style scoped>
-.search-page {
-  max-width: 900px;
-  margin: 0 auto;
+.home {
   padding: 20px;
-
-}
-h2, h3 {
-  color: #032541;
-}
-.status-message {
-  padding: 20px;
-  border-radius: 4px;
-  margin-top: 20px;
-  text-align: center;
-}
-.error-message {
-  background-color: #fdd;
-  color: #c00;
-  border: 1px solid #c00;
-}
-.no-results {
-  background-color: #f0f0f0;
-  color: #555;
-}
-.initial-message {
-  color: #888;
-}
-.results-list {
-  margin-top: 20px;
 }
 
+.search {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 
+
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.sb{
+    flex: 0.25;
+    padding: 10px;
+    font-size: 1rem;
+
+
+}
+.movie-card {
+  width: 180px;
+}
+
+.movie-card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.btn {
+  padding: 14px 18px;
+  font-size: 1rem;
+  border-radius: 30px;
+  border: none;
+  background-color: #032541;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap; /* évite le retour à la ligne */
+
+}
 </style>
