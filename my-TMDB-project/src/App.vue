@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+
 </script>
 
 <template>
@@ -13,3 +14,10 @@ import HelloWorld from './components/HelloWorld.vue'
 </template>
 
 
+<style>
+:root {
+  --heart-size-md: 32px;
+  --heart-empty: #bbbbbb;
+  --heart-full: red;
+}
+</style>

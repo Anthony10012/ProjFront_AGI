@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import FavoritToggle from "@/components/FavoritToggle.vue";
 
 const route = useRoute();
 const movieId = route.params.id;
@@ -29,6 +30,12 @@ onMounted(async () => {
     <div v-if="loading">Chargement…</div>
     <div v-else-if="error">{{ error }}</div>
     <div v-else class="movie-container">
+      <FavoritToggle
+          class="favorite-toggle"
+          :movieId="movie.id"
+      />
+
+
       <!-- Poster net à gauche -->
       <img
           v-if="movie?.poster_path"
@@ -73,9 +80,18 @@ onMounted(async () => {
 
 .movie-container {
   display: flex;
-  gap: clamp(20px, 8vw, 80px);  align-items: flex-start;
+  gap: clamp(20px, 8vw, 80px);
+  align-items: flex-start;
   position: relative;
-  z-index: 1; /* s'assure que le texte et le poster sont au-dessus du fond */
+  z-index: 1;
+  padding-top: 40px; /* espace pour le cœur */
+}
+
+.favorite-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
 }
 
 .movie-poster {
@@ -117,5 +133,12 @@ h1 {
   padding-right: 10px;  /* évite que le texte colle au bord */
   box-sizing: border-box;
 
+}
+
+.favorite-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
 }
 </style>

@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps } from 'vue';
+import FavoritToggle from "@/components/FavoritToggle.vue";
 
 const props = defineProps({
   movie: {
@@ -17,21 +18,28 @@ const posterUrl = props.movie.poster_path
 </script>
 
 <template>
-  <router-link :to="`/movie/${movie.id}`" class="movie-card">
-    <div class="movie-card">
-      <img :src="posterUrl" :alt="`Affiche de ${movie.title}`" class="movie-poster" />
-      <div class="movie-info">
-        <h3>{{ movie.title }}</h3>
-        <p class="release-date">Sortie: {{ movie.release_date || 'N/A' }}</p>
-        <p class="overview">{{ movie.overview.substring(0, 150) + (movie.overview.length > 150 ? '...' : '') }}</p>
+  <div class="movie-card">
+    <FavoritToggle
+        class="favorite-toggle"
+        :movieId="movie.id"
+    />
+
+
+    <router-link :to="`/movie/${movie.id}`">
+        <img :src="posterUrl" :alt="`Affiche de ${movie.title}`" class="movie-poster" />
+        <div class="movie-info">
+          <h3>{{ movie.title }}</h3>
+          <p class="release-date">Sortie: {{ movie.release_date || 'N/A' }}</p>
+          <p class="overview">{{ movie.overview.substring(0, 150) + (movie.overview.length > 150 ? '...' : '') }}</p>
       </div>
+      </router-link>
     </div>
-  </router-link>
 </template>
 
 <style scoped>
 .movie-card {
   display: flex;
+  position: relative;
   border: 1px solid #eee;
   border-radius: 8px;
   overflow: hidden;
@@ -58,5 +66,11 @@ h3 {
 .overview {
   font-size: 0.85em;
   color: #333;
+}
+.favorite-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
 }
 </style>
