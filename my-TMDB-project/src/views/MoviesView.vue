@@ -1,33 +1,31 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
+import MovieResult from "@/components/MovieResult.vue"; // Importation cruciale
+
 const apiKey = "d7a3a9b7bf495277a0437c9f4031d048";
 
-const moviesBase = ref([]);   // films discover (par défaut)
-const moviesSearch = ref([]); // films recherche
-const genres = ref([]); // Liste des genres
+const moviesBase = ref([]);
+const moviesSearch = ref([]);
+const genres = ref([]);
 
-const query = ref(""); // Texte de recherche
-const selectedGenre = ref(""); // Genre séléctionné pour l'utilisateur
-const sortBy = ref("popularity.desc"); // Option de tri selectionnée
+const query = ref("");
+const selectedGenre = ref("");
+const sortBy = ref("popularity.desc");
 
 // Charger les genres + films par défaut
 onMounted(async () => {
-  // Recuperation de la liste des genres
   const genreRes = await fetch(
       `https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=fr`
   );
   const genreData = await genreRes.json();
   genres.value = genreData.genres;
 
-  // Chargement des films par défaut
   await loadDiscover();
 });
 
-// Chargement des films via "discover"
 async function loadDiscover() {
   let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr&sort_by=${sortBy.value}`;
 
-  // Ajout du filtre par genre si selectionné
   if (selectedGenre.value) {
     url += `&with_genres=${selectedGenre.value}`;
   }
@@ -37,9 +35,7 @@ async function loadDiscover() {
   moviesBase.value = data.results;
 }
 
-//Recherche de film par texte
 async function searchMovies() {
-  // Si la recherche est vide on réinitialise les résultats
   if (!query.value) {
     moviesSearch.value = [];
     return;
@@ -54,46 +50,31 @@ async function searchMovies() {
   moviesSearch.value = data.results;
 }
 
-// Quand le genre ou le tri change
-// → on recharge les films discover uniquement
-// → seulement s'il n'y a pas de recherche active
+// Recharger si le genre ou le tri change (uniquement hors mode recherche textuelle)
 watch([selectedGenre, sortBy], () => {
   if (!query.value) {
     loadDiscover();
   }
 });
 
-// Liste finale des films à afficher
 const moviesToDisplay = computed(() => {
-
-  // Si une recherche est active → on affiche les résultats de recherche
-  // Sinon → on affiche les films par défaut (discover)
   const source = query.value ? moviesSearch.value : moviesBase.value;
-
-  // Copie du tableau pour éviter de modifier l'original
   let list = [...source];
 
-  // Filtre genre (frontend si en mode recherche)
+  // Filtre genre si on est en mode recherche textuelle (car l'API search ne filtre pas par genre nativement facilement)
   if (selectedGenre.value && query.value) {
     list = list.filter(movie =>
         movie.genre_ids?.includes(Number(selectedGenre.value))
     );
   }
 
-  // Tri frontend si search
+  // Tri manuel si on est en mode recherche
   if (query.value) {
-    // on découpe la valeur du tri
-    // key = critère de tri, order = sens du tri
     const [key, order] = sortBy.value.split(".");
-
     list.sort((a, b) => {
-      // Valeurs à comparer (sécurité si la valeur est absente)
       const aVal = a[key] || 0;
       const bVal = b[key] || 0;
-      // Application du tri selon le sens choisi
-      return order === "asc"
-          ? aVal - bVal // ordre croissant
-          : bVal - aVal; // ordre décroissant
+      return order === "asc" ? aVal - bVal : bVal - aVal;
     });
   }
 
@@ -102,98 +83,109 @@ const moviesToDisplay = computed(() => {
 </script>
 
 <template>
-  <div class="movies">
-    <h1>Recherche films</h1>
+  <div class="movies-container">
+    <h1>Explorer les films</h1>
 
-    <div class="filters">
-      <input class="search" v-model="query" placeholder="Rechercher..." />
+    <div class="filters-bar">
+      <input
+          class="search-input"
+          v-model="query"
+          placeholder="Rechercher par titre..."
+          @keyup.enter="searchMovies"
+      />
 
-      <select  class="btn2" v-model="selectedGenre">
+      <select class="select-style" v-model="selectedGenre">
         <option value="">Tous les genres</option>
         <option v-for="g in genres" :key="g.id" :value="g.id">
           {{ g.name }}
         </option>
       </select>
 
-      <select class="btn2" v-model="sortBy">
-        <option value="popularity.desc">Popularité +</option>
-        <option value="popularity.asc">Popularité -</option>
-        <option value="release_date.desc">Date +</option>
-        <option value="release_date.asc">Date -</option>
-        <option value="vote_average.desc">Note +</option>
-        <option value="vote_average.asc">Note -</option>
+      <select class="select-style" v-model="sortBy">
+        <option value="popularity.desc">Popularité (Décroissant)</option>
+        <option value="popularity.asc">Popularité (Croissant)</option>
+        <option value="release_date.desc">Date (Récent)</option>
+        <option value="release_date.asc">Date (Ancien)</option>
+        <option value="vote_average.desc">Note (Meilleure)</option>
+        <option value="vote_average.asc">Note (Pire)</option>
       </select>
 
-      <button  class="btn" @click="searchMovies">Rechercher</button>
+      <button class="btn-search" @click="searchMovies">Rechercher</button>
     </div>
 
-    <div class="grid">
-      <div v-for="movie in moviesToDisplay" :key="movie.id" class="movie-card">
-        <img v-if="movie.poster_path"
-             :src="'https://image.tmdb.org/t/p/w500' + movie.poster_path" />
-        <h3>{{ movie.title }}</h3>
-        <p>{{ movie.release_date }}</p>
-        <p>⭐ {{ movie.vote_average }}</p>
-      </div>
+    <div class="movies-grid">
+      <MovieResult
+          v-for="movie in moviesToDisplay"
+          :key="movie.id"
+          :movie="movie"
+      />
+    </div>
+
+    <div v-if="moviesToDisplay.length === 0" class="no-results">
+      Aucun film ne correspond à vos critères.
     </div>
   </div>
 </template>
 
-
-
-
 <style scoped>
-.movies {
+.movies-container {
   padding: 20px;
-
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.filters {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.grid {
+.filters-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 15px;
+  margin-bottom: 30px;
+  background: #f4f4f4;
+  padding: 20px;
+  border-radius: 12px;
 }
 
-.movie-card {
-  width: 180px;
-}
-
-.movie-card img {
-  width: 100%;
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px;
+  border: 1px solid #ccc;
   border-radius: 8px;
 }
 
-.btn {
-  padding: 14px 18px;
-  font-size: 1rem;
-  border-radius: 30px;
+.select-style {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
+
+.btn-search {
+  padding: 10px 25px;
+  border-radius: 8px;
   border: none;
   background-color: #032541;
   color: white;
+  font-weight: bold;
   cursor: pointer;
-  white-space: nowrap; /* évite le retour à la ligne */
-
+  transition: background 0.3s;
 }
 
-.btn2{
-  height: 35px;
-  padding: 8px 12px;
-  margin-top: 5px;
-  font-size: 1rem;
-  border: none;
-  background-color: #032541;
-  color: white;
-  cursor: pointer;
-  white-space: nowrap; /* évite le retour à la ligne */
+.btn-search:hover {
+  background-color: #01b4e4;
 }
 
-.search{
-  width: 350px;
+/* Grille flexible pour MovieResult */
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.no-results {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 1.2rem;
+  color: #666;
 }
 </style>
