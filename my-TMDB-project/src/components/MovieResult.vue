@@ -40,11 +40,10 @@ const posterUrl = props.movie.poster_path
 .movie-card {
   display: flex;
   position: relative;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  border-radius: 20px;
   overflow: hidden;
   margin-bottom: 15px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: lightblue;
 }
 .movie-poster {
   width: 100px;
@@ -58,6 +57,7 @@ const posterUrl = props.movie.poster_path
 h3 {
   margin-top: 0;
   font-size: 1.2em;
+  color: red;
 }
 .release-date {
   font-size: 0.9em;
@@ -65,7 +65,7 @@ h3 {
 }
 .overview {
   font-size: 0.85em;
-  color: #333;
+  color: #ffffff;
 }
 .favorite-toggle {
   position: absolute;
