@@ -14,23 +14,25 @@ const goBack = () => {
 </script>
 
 <template>
-  <div id="app-layout">
-    <Transition name="fade">
-      <button
-          v-if="showBackButton"
-          @click="goBack"
-          class="global-back-btn"
-          title="Page précédente"
-      >
-        <span class="icon">←</span> Retour
-      </button>
-    </Transition>
+    <div id="app-layout">
+      <Transition name="fade">
+        <button
+            v-if="showBackButton"
+            @click="goBack"
+            class="global-back-btn"
+            title="Page précédente"
+        >
+          <span class="icon">←</span> Retour
+        </button>
+      </Transition>
 
-    <nav>
-    </nav>
+      <nav>
+      </nav>
 
-    <router-view />
-  </div>
+      <router-view />
+    </div>
+
+
 </template>
 
 <style>
