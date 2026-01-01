@@ -40,7 +40,6 @@ VITE_TMDB_TOKEN=TON_TOKEN_ICI
 
 **Exemple de requête ou d'intégration**
 
-1️. Exemple de requête API
 
 La requête vers TheMovieDB (TMDB) se trouve ici :
 
