@@ -39,3 +39,20 @@ La clé doit être placée dans un fichier .env :
 VITE_TMDB_TOKEN=TON_TOKEN_ICI
 
 **Exemple de requête ou d'intégration**
+
+1️. Exemple de requête API
+
+La requête vers TheMovieDB (TMDB) se trouve ici :
+
+const response = await fetch(
+  `${API_URL}?api_key=${API_KEY}&query=${encodeURIComponent(newQuery)}&language=fr-FR`
+);
+
+
+Intégration dans un store Pinia
+export const useSearchStore = defineStore('search', {
+
+
+Le store centralise :
+l’état (results, isLoading, error)
+la logique métier (searchMovies)
