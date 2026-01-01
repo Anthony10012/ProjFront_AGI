@@ -35,28 +35,51 @@ onMounted(async () => {
 async function loadMovies() {
   isLoading.value = true;
 
-  let url = "";
-  if (query.value) {
-    url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr&query=${encodeURIComponent(
-        query.value
-    )}&page=${currentPage.value}`;
-  } else {
-    url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr&sort_by=${sortBy.value}&page=${currentPage.value}`;
-    if (selectedGenre.value) url += `&with_genres=${selectedGenre.value}`;
-  }
-
   try {
-    const res = await fetch(url);
-    const data = await res.json();
-    movies.value = data.results;
-    totalPages.value = data.total_pages;
+    let data;
+
+    // Si il y a une recherche texte, on utilise search endpoint
+    if (query.value.trim()) {
+      const res = await fetch(
+          `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr&query=${encodeURIComponent(query.value)}&page=${currentPage.value}`
+      );
+      data = await res.json();
+
+      // Filtrage manuel par genre si sélectionné
+      let results = data.results;
+      if (selectedGenre.value) {
+        results = results.filter(m => m.genre_ids.includes(Number(selectedGenre.value)));
+      }
+
+      // Tri manuel selon sortBy
+      if (sortBy.value.includes("popularity")) {
+        results.sort((a,b) => sortBy.value.endsWith("desc") ? b.popularity - a.popularity : a.popularity - b.popularity);
+      } else if (sortBy.value.includes("release_date")) {
+        results.sort((a,b) => sortBy.value.endsWith("desc") ? new Date(b.release_date) - new Date(a.release_date) : new Date(a.release_date) - new Date(b.release_date));
+      } else if (sortBy.value.includes("vote_average")) {
+        results.sort((a,b) => sortBy.value.endsWith("desc") ? b.vote_average - a.vote_average : a.vote_average - b.vote_average);
+      }
+
+      movies.value = results;
+      totalPages.value = data.total_pages;
+
+    } else {
+      // Discover endpoint si pas de texte
+      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr&page=${currentPage.value}&sort_by=${sortBy.value}`;
+      if (selectedGenre.value) url += `&with_genres=${selectedGenre.value}`;
+
+      const res = await fetch(url);
+      data = await res.json();
+      movies.value = data.results;
+      totalPages.value = data.total_pages;
+    }
+
   } catch (e) {
     console.error("Erreur chargement films", e);
   } finally {
     isLoading.value = false;
+    updateRouteQuery();
   }
-
-  updateRouteQuery();
 }
 
 /* Mettre à jour les query params pour la mémoire */
@@ -81,18 +104,6 @@ watch(currentPage, () => {
   loadMovies();
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
-
-/* Watch sur route pour restaurer l’état si on revient */
-watch(
-    () => route.query,
-    (newQuery) => {
-      query.value = newQuery.q || "";
-      selectedGenre.value = newQuery.genre || "";
-      sortBy.value = newQuery.sort || "popularity.desc";
-      currentPage.value = Number(newQuery.page) || 1;
-      loadMovies();
-    }
-);
 </script>
 
 <template>
