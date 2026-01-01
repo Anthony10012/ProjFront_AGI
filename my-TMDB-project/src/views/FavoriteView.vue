@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import FavoritToggle from "@/components/FavoritToggle.vue"
 
 const apiKey = "d7a3a9b7bf495277a0437c9f4031d048"
 
 const favoriteIds = ref<(string | number)[]>([])
 const favoriteMovies = ref<any[]>([])
+
+/* Pagination */
+const currentPage = ref(1)
+const moviesPerPage = 14
+
+const totalPages = computed(() => {
+  return Math.ceil(favoriteMovies.value.length / moviesPerPage)
+})
+
+const paginatedMovies = computed(() => {
+  const start = (currentPage.value - 1) * moviesPerPage
+  return favoriteMovies.value.slice(start, start + moviesPerPage)
+})
 
 /**
  * Charge les favoris depuis localStorage et récupère les infos complètes
@@ -22,7 +35,9 @@ const loadFavorites = async () => {
   const movies = await Promise.all(
       favoriteIds.value.map(async id => {
         try {
-          const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=fr-FR`)
+          const res = await fetch(
+              `https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=fr-FR`
+          )
           return await res.json()
         } catch {
           return null
@@ -32,15 +47,16 @@ const loadFavorites = async () => {
 
   favoriteMovies.value = movies.filter(movie => movie && movie.poster_path)
 
-  // Nettoyer localStorage pour enlever les films invalides
+  // Nettoyer localStorage
   favoriteIds.value = favoriteMovies.value.map(movie => movie.id)
   localStorage.setItem('favorites', JSON.stringify(favoriteIds.value))
+
+  // Reset pagination
+  currentPage.value = 1
 }
 
 onMounted(() => {
   loadFavorites()
-
-  // Écoute les changements de favoris depuis FavoritToggle
   window.addEventListener('favoritesUpdated', loadFavorites)
 })
 
@@ -48,6 +64,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('favoritesUpdated', loadFavorites)
 })
 </script>
+
 
 <template>
   <div class="favorites-page">
@@ -57,27 +74,61 @@ onBeforeUnmount(() => {
       Aucun favori pour le moment.
     </div>
 
-    <div v-else class="movies-grid">
-      <div v-for="movie in favoriteMovies" :key="movie.id" class="movie-card">
-        <!-- Cœur -->
-        <FavoritToggle class="favorite-toggle" :movieId="movie.id" />
-
-        <!-- Lien vers la page du film -->
-        <router-link :to="`/movie/${movie.id}`" class="movie-link">
-          <img
-              :src="`https://image.tmdb.org/t/p/w200${movie.poster_path}`"
-              :alt="movie.title"
-              class="movie-poster"
+    <div v-else>
+      <div class="movies-grid">
+        <div
+            v-for="movie in paginatedMovies"
+            :key="movie.id"
+            class="movie-card"
+        >
+          <!-- Cœur -->
+          <FavoritToggle
+              class="favorite-toggle"
+              :movieId="movie.id"
           />
-          <div class="movie-info">
-            <h3>{{ movie.title }}</h3>
-            <p class="release-date">Sortie: {{ movie.release_date || 'N/A' }}</p>
-          </div>
-        </router-link>
+
+          <!-- Lien vers la page du film -->
+          <router-link
+              :to="`/movie/${movie.id}`"
+              class="movie-link"
+          >
+            <img
+                :src="`https://image.tmdb.org/t/p/w200${movie.poster_path}`"
+                :alt="movie.title"
+                class="movie-poster"
+            />
+            <div class="movie-info">
+              <h3>{{ movie.title }}</h3>
+              <p class="release-date">
+                Sortie: {{ movie.release_date || 'N/A' }}
+              </p>
+            </div>
+          </router-link>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="pagination">
+        <button
+            :disabled="currentPage === 1"
+            @click="currentPage--"
+        >
+          ◀ Précédent
+        </button>
+
+        <span>Page {{ currentPage }} / {{ totalPages }}</span>
+
+        <button
+            :disabled="currentPage === totalPages"
+            @click="currentPage++"
+        >
+          Suivant ▶
+        </button>
       </div>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .favorites-page {
@@ -140,5 +191,27 @@ h3 {
 .release-date {
   font-size: 0.85em;
   color: #555;
+}
+
+.pagination {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.pagination button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background-color: #222;
+  color: white;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>
