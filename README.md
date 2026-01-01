@@ -24,7 +24,8 @@
 
 # Présentation de la structure du projet	
 
-https://cdn.discordapp.com/attachments/1408413831016747081/1456301703199592509/Capture_decran_2026-01-01_160226.png?ex=6957de26&is=69568ca6&hm=ab39a0b167078df1f6990d00bfe4ab02b761a963a160165ec7866122141000c7&
+<img width="421" height="825" alt="Capture_decran_2026-01-01_160226" src="https://github.com/user-attachments/assets/630cc8c9-e876-477d-9d4d-917866b116a0" />
+
 
 # Explication de l’API choisie et de son intégration
 
