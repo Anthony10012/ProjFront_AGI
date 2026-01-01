@@ -1,22 +1,26 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import MovieResult from "@/components/MovieResult.vue";
 
 const apiKey = "d7a3a9b7bf495277a0437c9f4031d048";
 
+const route = useRoute();
+const router = useRouter();
+
 const movies = ref([]);
 const genres = ref([]);
 
-const query = ref("");
-const selectedGenre = ref("");
-const sortBy = ref("popularity.desc");
-
-/* Pagination API */
-const currentPage = ref(1);
+// Lecture initiale depuis l'URL pour restaurer état
+const query = ref(route.query.q || "");
+const selectedGenre = ref(route.query.genre || "");
+const sortBy = ref(route.query.sort || "popularity.desc");
+const currentPage = ref(Number(route.query.page) || 1);
 const totalPages = ref(1);
+
 const isLoading = ref(false);
 
-/* Chargement initial */
+/* Chargement des genres et des films */
 onMounted(async () => {
   const genreRes = await fetch(
       `https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=fr`
@@ -24,7 +28,7 @@ onMounted(async () => {
   const genreData = await genreRes.json();
   genres.value = genreData.genres;
 
-  await loadMovies();
+  loadMovies();
 });
 
 /* Chargement centralisé */
@@ -32,25 +36,42 @@ async function loadMovies() {
   isLoading.value = true;
 
   let url = "";
-
   if (query.value) {
-    url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr&query=${encodeURIComponent(query.value)}&page=${currentPage.value}`;
+    url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr&query=${encodeURIComponent(
+        query.value
+    )}&page=${currentPage.value}`;
   } else {
     url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr&sort_by=${sortBy.value}&page=${currentPage.value}`;
-    if (selectedGenre.value) {
-      url += `&with_genres=${selectedGenre.value}`;
-    }
+    if (selectedGenre.value) url += `&with_genres=${selectedGenre.value}`;
   }
 
-  const res = await fetch(url);
-  const data = await res.json();
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    movies.value = data.results;
+    totalPages.value = data.total_pages;
+  } catch (e) {
+    console.error("Erreur chargement films", e);
+  } finally {
+    isLoading.value = false;
+  }
 
-  movies.value = data.results;
-  totalPages.value = data.total_pages;
-  isLoading.value = false;
+  updateRouteQuery();
 }
 
-/* Réagir aux changements */
+/* Mettre à jour les query params pour la mémoire */
+function updateRouteQuery() {
+  router.replace({
+    query: {
+      q: query.value || undefined,
+      genre: selectedGenre.value || undefined,
+      sort: sortBy.value || undefined,
+      page: currentPage.value
+    }
+  });
+}
+
+/* Watchers pour reload */
 watch([query, selectedGenre, sortBy], () => {
   currentPage.value = 1;
   loadMovies();
@@ -60,26 +81,30 @@ watch(currentPage, () => {
   loadMovies();
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
+
+/* Watch sur route pour restaurer l’état si on revient */
+watch(
+    () => route.query,
+    (newQuery) => {
+      query.value = newQuery.q || "";
+      selectedGenre.value = newQuery.genre || "";
+      sortBy.value = newQuery.sort || "popularity.desc";
+      currentPage.value = Number(newQuery.page) || 1;
+      loadMovies();
+    }
+);
 </script>
-
-
 
 <template>
   <div class="movies-container">
     <h1>Explorer les films</h1>
 
     <div class="filters-bar">
-      <input
-          class="search-input"
-          v-model="query"
-          placeholder="Rechercher par titre..."
-      />
+      <input class="search-input" v-model="query" placeholder="Rechercher par titre..." />
 
       <select class="select-style" v-model="selectedGenre">
         <option value="">Tous les genres</option>
-        <option v-for="g in genres" :key="g.id" :value="g.id">
-          {{ g.name }}
-        </option>
+        <option v-for="g in genres" :key="g.id" :value="g.id">{{ g.name }}</option>
       </select>
 
       <select class="select-style" v-model="sortBy">
@@ -110,9 +135,7 @@ watch(currentPage, () => {
   </div>
 </template>
 
-
 <style scoped>
-
 .loading {
   text-align: center;
   font-size: 1.2rem;
@@ -150,22 +173,6 @@ watch(currentPage, () => {
   cursor: pointer;
 }
 
-.btn-search {
-  padding: 10px 25px;
-  border-radius: 8px;
-  border: none;
-  background-color: #032541;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.btn-search:hover {
-  background-color: #01b4e4;
-}
-
-/* Grille flexible pour MovieResult */
 .movies-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -178,6 +185,7 @@ watch(currentPage, () => {
   font-size: 1.2rem;
   color: #666;
 }
+
 .pagination {
   margin-top: 40px;
   display: flex;
@@ -199,5 +207,4 @@ watch(currentPage, () => {
   opacity: 0.4;
   cursor: not-allowed;
 }
-
 </style>

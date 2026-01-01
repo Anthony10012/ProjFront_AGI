@@ -7,9 +7,9 @@
           class="search-bar"
           v-model="query"
           placeholder="Rechercher un film..."
-          @keyup.enter="searchMovies"
+          @keyup.enter="goToFirstPage"
       />
-      <button class="btn-main" @click="searchMovies">Rechercher</button>
+      <button class="btn-main" @click="goToFirstPage">Rechercher</button>
 
       <router-link to="/movies">
         <button class="btn-secondary">Filtres & Tri avancés</button>
@@ -32,49 +32,74 @@
 
     <!-- Pagination uniquement pour la recherche -->
     <div v-if="isSearching && totalPages > 1" class="pagination">
-      <button :disabled="currentPage === 1" @click="currentPage--">◀</button>
+      <button :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">◀</button>
       <span>Page {{ currentPage }} / {{ totalPages }}</span>
-      <button :disabled="currentPage === totalPages" @click="currentPage++">▶</button>
+      <button :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">▶</button>
     </div>
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import MovieResult from "@/components/MovieResult.vue";
 
 const apiKey = "d7a3a9b7bf495277a0437c9f4031d048";
 
-const query = ref("");
+const route = useRoute();
+const router = useRouter();
+
+const query = ref(route.query.q || "");
+const currentPage = ref(Number(route.query.page) || 1);
+
 const moviesPopular = ref([]);
 const searchResults = ref([]);
-
-/* Pagination pour la recherche */
-const currentPage = ref(1);
 const totalPages = ref(1);
 const isSearching = ref(false);
 const isLoading = ref(false);
 
-/* Chargement des films populaires */
+// Affiche les films populaires par défaut
 onMounted(async () => {
-  try {
-    const res = await fetch(
-        `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr&sort_by=popularity.desc&page=1`
-    );
-    const data = await res.json();
-    moviesPopular.value = data.results.slice(0, 12);
-  } catch (error) {
-    console.error("Erreur lors du chargement des films :", error);
+  if (!query.value) {
+    try {
+      const res = await fetch(
+          `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr&sort_by=popularity.desc&page=1`
+      );
+      const data = await res.json();
+      moviesPopular.value = data.results.slice(0, 12);
+    } catch (error) {
+      console.error("Erreur lors du chargement des films :", error);
+    }
+  } else {
+    // Si query param présent, lancer la recherche
+    searchMovies();
   }
 });
 
-/* Recherche de films avec pagination */
+// Fonction pour lancer la recherche depuis la page 1
+function goToFirstPage() {
+  currentPage.value = 1;
+  updateRouteQuery();
+  searchMovies();
+}
+
+// Fonction pour changer de page
+function goToPage(page) {
+  currentPage.value = page;
+  updateRouteQuery();
+  searchMovies();
+}
+
+// Mettre à jour les query params dans l'URL
+function updateRouteQuery() {
+  router.replace({ query: { q: query.value || undefined, page: currentPage.value } });
+}
+
+// Recherche avec pagination
 async function searchMovies() {
   if (!query.value.trim()) {
     searchResults.value = [];
     isSearching.value = false;
-    currentPage.value = 1;
     totalPages.value = 1;
     return;
   }
@@ -98,22 +123,18 @@ async function searchMovies() {
   }
 }
 
-/* Déclencher la recherche automatiquement quand on change de page */
-watch(currentPage, () => {
-  if (isSearching.value) {
-    searchMovies();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+// Déclenche recherche automatiquement si query ou page change via query param
+watch([() => route.query.q, () => route.query.page], ([newQuery, newPage]) => {
+  if (newQuery !== undefined) query.value = newQuery;
+  if (newPage !== undefined) currentPage.value = Number(newPage);
+  if (query.value) searchMovies();
 });
 
-/* Choix des films à afficher */
+// Films à afficher
 const displayedMovies = computed(() => {
-  return searchResults.value.length > 0 || isSearching.value
-      ? searchResults.value
-      : moviesPopular.value;
+  return isSearching.value ? searchResults.value : moviesPopular.value;
 });
 </script>
-
 
 <style scoped>
 .home {
@@ -139,7 +160,6 @@ const displayedMovies = computed(() => {
   border-radius: 8px;
 }
 
-/* Grille alignée sur MovieResult */
 .movies-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -205,7 +225,6 @@ const displayedMovies = computed(() => {
   cursor: not-allowed;
 }
 
-/* Ajustement pour mobile */
 @media (max-width: 600px) {
   .movies-grid {
     grid-template-columns: 1fr;
