@@ -1,65 +1,70 @@
 <script setup>
-import { useRouter, useRoute } from 'vue-router';
-import { computed } from 'vue';
+  import { useRouter, useRoute } from 'vue-router';
+  import { computed } from 'vue';
 
-const router = useRouter();
-const route = useRoute();
+  const router = useRouter();
+  const route = useRoute();
 
-// On cache le bouton si on est déjà sur la page d'accueil
-const showBackButton = computed(() => route.path !== '/');
+  // On cache le bouton si on est déjà sur la page d'accueil
+  const showBackButton = computed(() => route.path !== '/');
 
-const goBack = () => {
+  const goBack = () => {
   router.back();
-};
+  };
 </script>
-
 <template>
-    <div id="app-layout">
-      <Transition name="fade">
-        <button
-            v-if="showBackButton"
-            @click="goBack"
-            class="global-back-btn"
-            title="Page précédente"
-        >
-          <span class="icon">←</span> Retour
-        </button>
-      </Transition>
+  <div id="app-layout">
+    <nav class="global-nav">
+      <!-- Bouton Retour (s'affiche seulement si on n'est pas sur la page d'accueil) -->
+      <button
+          v-if="showBackButton"
+          @click="goBack"
+          class="global-back-btn"
+          title="Page précédente"
+      >
+        <span class="icon">←</span> Retour
+      </button>
 
-      <nav>
-      </nav>
+      <!-- Ici tu peux mettre d'autres liens de nav -->
+      <router-link to="/" class="nav-link">Accueil</router-link>
+      <router-link to="/movies" class="nav-link">Films</router-link>
+      <router-link to ="/favoris" class="nav-link">Favoris</router-link>
+    </nav>
 
-      <router-view />
-    </div>
-
-
+    <router-view />
+  </div>
 </template>
 
-<style>
-/* Style global pour le bouton */
-.global-back-btn {
-  position: fixed; /* Fixé à l'écran */
-  bottom: 30px;    /* En bas */
-  left: 30px;      /* À gauche */
-  z-index: 1000;   /* Par-dessus tout */
 
+<style>
+/* Nav bar classique */
+.global-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 15px;
   padding: 12px 20px;
-
   background-color: #032541;
   color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Bouton retour */
+.global-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
   border: none;
-  border-radius: 50px;
+  background-color: #01b4e4;
+  color: white;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  transition: background 0.3s, transform 0.2s;
 }
 
 .global-back-btn:hover {
-  background-color: #01b4e4;
+  background-color: #0282b2;
   transform: scale(1.05);
 }
 
@@ -67,12 +72,17 @@ const goBack = () => {
   font-size: 1.2rem;
 }
 
-/* Animation pour l'apparition/disparition du bouton */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s, transform 0.5s;
+/* Liens de nav */
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: background 0.3s;
 }
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-  transform: translateY(20px);
+
+.nav-link:hover {
+  background-color: #01b4e4;
 }
 </style>
