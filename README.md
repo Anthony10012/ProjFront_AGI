@@ -27,6 +27,23 @@
 <img width="421" height="825" alt="Capture_decran_2026-01-01_160226" src="https://github.com/user-attachments/assets/630cc8c9-e876-477d-9d4d-917866b116a0" />
 
 
+Dossier Router:
+
+index.js :  Pour gérer les routes pour les pages
+
+Dossier Components:
+
+Plusieurs fichiers .Vue pour différencier les utilisations.
+
+Dossier stores:
+Contient un fichier Pinia pour stocker les données partagées entre plusieurs page sans recharger l'API
+
+Fichier .env: Pour stocker la clé de l'API
+
+Package.json :Liste de toutes les bibliothèques du projet.
+
+
+
 # Explication de l’API choisie et de son intégration
 
 **Lien vers l'API utilisée**
