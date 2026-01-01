@@ -16,6 +16,8 @@
       </router-link>
     </div>
 
+    <div v-if="isLoading" class="loading">Chargement…</div>
+
     <div class="movies-grid">
       <MovieResult
           v-for="movie in displayedMovies"
@@ -24,15 +26,23 @@
       />
     </div>
 
-    <div v-if="displayedMovies.length === 0" class="no-results">
+    <div v-if="displayedMovies.length === 0 && !isLoading" class="no-results">
       Aucun film trouvé pour "{{ query }}".
+    </div>
+
+    <!-- Pagination uniquement pour la recherche -->
+    <div v-if="isSearching && totalPages > 1" class="pagination">
+      <button :disabled="currentPage === 1" @click="currentPage--">◀</button>
+      <span>Page {{ currentPage }} / {{ totalPages }}</span>
+      <button :disabled="currentPage === totalPages" @click="currentPage++">▶</button>
     </div>
   </div>
 </template>
 
+
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import MovieResult from "@/components/MovieResult.vue"; // On importe le composant commun
+import { ref, onMounted, computed, watch } from "vue";
+import MovieResult from "@/components/MovieResult.vue";
 
 const apiKey = "d7a3a9b7bf495277a0437c9f4031d048";
 
@@ -40,45 +50,70 @@ const query = ref("");
 const moviesPopular = ref([]);
 const searchResults = ref([]);
 
-// Charger les films populaires au montage
+/* Pagination pour la recherche */
+const currentPage = ref(1);
+const totalPages = ref(1);
+const isSearching = ref(false);
+const isLoading = ref(false);
+
+/* Chargement des films populaires */
 onMounted(async () => {
   try {
     const res = await fetch(
         `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr&sort_by=popularity.desc&page=1`
     );
     const data = await res.json();
-    // On affiche les 12 premiers films populaires par défaut
     moviesPopular.value = data.results.slice(0, 12);
   } catch (error) {
     console.error("Erreur lors du chargement des films :", error);
   }
 });
 
-// Recherche de films
+/* Recherche de films avec pagination */
 async function searchMovies() {
   if (!query.value.trim()) {
     searchResults.value = [];
+    isSearching.value = false;
+    currentPage.value = 1;
+    totalPages.value = 1;
     return;
   }
+
+  isSearching.value = true;
+  isLoading.value = true;
 
   try {
     const res = await fetch(
         `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr&query=${encodeURIComponent(
             query.value
-        )}`
+        )}&page=${currentPage.value}`
     );
     const data = await res.json();
     searchResults.value = data.results;
+    totalPages.value = data.total_pages;
   } catch (error) {
     console.error("Erreur lors de la recherche :", error);
+  } finally {
+    isLoading.value = false;
   }
 }
 
-// Choix de la source de données
+/* Déclencher la recherche automatiquement quand on change de page */
+watch(currentPage, () => {
+  if (isSearching.value) {
+    searchMovies();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+});
+
+/* Choix des films à afficher */
 const displayedMovies = computed(() => {
-  return searchResults.value.length > 0 ? searchResults.value : moviesPopular.value;
+  return searchResults.value.length > 0 || isSearching.value
+      ? searchResults.value
+      : moviesPopular.value;
 });
 </script>
+
 
 <style scoped>
 .home {
@@ -140,6 +175,34 @@ const displayedMovies = computed(() => {
   text-align: center;
   padding: 40px;
   color: #666;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  margin: 20px 0;
+}
+
+.pagination {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #032541;
+  color: white;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* Ajustement pour mobile */
