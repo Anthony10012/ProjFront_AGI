@@ -50,9 +50,12 @@ const response = await fetch(
 
 
 Intégration dans un store Pinia
+
 export const useSearchStore = defineStore('search', {
 
 
 Le store centralise :
+
 l’état (results, isLoading, error)
+
 la logique métier (searchMovies)
