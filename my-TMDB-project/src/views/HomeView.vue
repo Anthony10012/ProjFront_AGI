@@ -152,6 +152,7 @@ const displayedMovies = computed(() => {
 }
 
 .search-bar {
+  order: -1;
   flex: 1;
   min-width: 250px;
   padding: 12px;
@@ -186,8 +187,8 @@ const displayedMovies = computed(() => {
   font-size: 1rem;
   border-radius: 30px;
   border: 1px solid #032541;
-  background-color: transparent;
-  color: #032541;
+  background-color: #032541;
+  color: white;
   cursor: pointer;
 }
 

@@ -163,9 +163,6 @@ watch(currentPage, () => {
   flex-wrap: wrap;
   gap: 15px;
   margin-bottom: 30px;
-  background: #f4f4f4;
-  padding: 20px;
-  border-radius: 12px;
 }
 
 .search-input {
@@ -179,8 +176,7 @@ watch(currentPage, () => {
 .select-style {
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #ccc;
-  background: white;
+  background: mediumaquamarine;
   cursor: pointer;
 }
 

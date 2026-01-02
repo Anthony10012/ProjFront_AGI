@@ -39,11 +39,12 @@ const overviewText = computed(() => {
 .movie-card {
   position: relative;
   display: flex;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  border: 1px solid mediumaquamarine;
+  border-radius: 5%;
   overflow: hidden;
   margin-bottom: 15px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background-color: aquamarine;
 }
 
 .movie-card-link {
