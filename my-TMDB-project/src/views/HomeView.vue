@@ -210,6 +210,7 @@ const displayedMovies = computed(() => {
   justify-content: center;
   align-items: center;
   gap: 15px;
+  color: white;
 }
 
 .pagination button {

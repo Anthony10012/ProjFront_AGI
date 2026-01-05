@@ -199,6 +199,7 @@ h3 {
   justify-content: center;
   align-items: center;
   gap: 15px;
+  color: white;
 }
 
 .pagination button {

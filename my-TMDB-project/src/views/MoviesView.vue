@@ -199,6 +199,7 @@ watch(currentPage, () => {
   justify-content: center;
   align-items: center;
   gap: 16px;
+  color: white;
 }
 
 .pagination button {
